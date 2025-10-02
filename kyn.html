@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <title>Know Your Numbers - Springfield College 2025</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -15,7 +18,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'SF Pro Text', 'Segoe UI', Roboto, Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -160,6 +163,25 @@
             margin-left: 5px;
         }
         
+        .tooltip-bubble {
+            position: fixed;
+            max-width: 320px;
+            background: #ffffff;
+            color: #2c3e50;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 12px 14px;
+            z-index: 9999;
+            font-size: 0.92em;
+        }
+        .tooltip-bubble h4 {
+            margin: 0 0 6px 0;
+            font-size: 1em;
+            color: #1e3c72;
+        }
+        .tooltip-bubble p { margin: 0; line-height: 1.35; }
+        
         .calculate-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -256,23 +278,15 @@
         }
         
         .recommendations ul {
-            list-style: none;
-            padding: 0;
+            list-style: disc;
+            padding-left: 20px;
         }
         
         .recommendations li {
             padding: 10px 0;
-            padding-left: 25px;
-            position: relative;
         }
         
-        .recommendations li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #2196F3;
-            font-weight: bold;
-        }
+        .recommendations li:before { content: none; }
         
         .resources {
             display: grid;
@@ -320,6 +334,7 @@
             background: rgba(255,255,255,0.2);
             padding: 15px;
             border-radius: 10px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
         }
         
@@ -435,22 +450,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 Know Your Numbers</h1>
+            <h1>Know Your Numbers</h1>
             <p>2025 Springfield College Health Promotion Campaign</p>
             <p style="font-size: 0.9em; margin-top: 10px;">HLTH 210: Family and Consumer Health - Health Communication Campaign</p>
         </div>
         
         <div class="campaign-info">
-            <h3>📊 Why Knowing Your Numbers Matters</h3>
+            <h3>Why Knowing Your Numbers Matters</h3>
             <p><strong>According to the CDC and American Heart Association:</strong> Over 120 million American adults have high blood pressure, but only 1 in 4 have it under control. Nearly 94 million adults over age 20 have high cholesterol. These "silent killers" often have no symptoms but dramatically increase your risk of heart disease, stroke, and premature death. Student-athletes face unique challenges with athletic heart syndrome, dehydration, and performance optimization requiring specialized monitoring.</p>
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="showTab('calculator')">🧮 Health Calculator</button>
-            <button class="tab" onclick="showTab('athlete')">🏃 Student-Athlete Tools</button>
-            <button class="tab" onclick="showTab('education')">📚 Education & Data</button>
-            <button class="tab" onclick="showTab('resources')">🏥 Resources & Contacts</button>
-            <button class="tab" onclick="showTab('statistics')">📈 National Statistics</button>
+            <button class="tab active" onclick="showTab('calculator', this)">Health Calculator</button>
+            <button class="tab" onclick="showTab('athlete', this)">Student-Athlete Tools</button>
+            <button class="tab" onclick="showTab('education', this)">Education & Data</button>
+            <button class="tab" onclick="showTab('resources', this)">Resources & Contacts</button>
+            <button class="tab" onclick="showTab('statistics', this)">National Statistics</button>
         </div>
         
         <div class="content">
@@ -460,12 +475,12 @@
                 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Age <span class="info-tooltip" title="Required for accurate risk assessment">?</span></label>
+                        <label>Age <span class="info-tooltip" data-tooltip-key="age">?</span></label>
                         <input type="number" id="age" min="1" max="120" placeholder="Enter your age">
                     </div>
                     
                     <div class="form-group">
-                        <label>Sex</label>
+                        <label for="sex">Sex</label>
                         <select id="sex">
                             <option value="">Select</option>
                             <option value="male">Male</option>
@@ -474,7 +489,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Height (inches) <span class="info-tooltip" title="1 foot = 12 inches">?</span></label>
+                        <label>Height (inches) <span class="info-tooltip" data-tooltip-key="height">?</span></label>
                         <input type="number" id="height" min="20" max="100" step="0.1" placeholder="e.g., 68">
                     </div>
                     
@@ -484,12 +499,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Systolic BP (mmHg) <span class="info-tooltip" title="Top number in blood pressure reading">?</span></label>
+                        <label>Systolic BP (mmHg) <span class="info-tooltip" data-tooltip-key="systolic">?</span></label>
                         <input type="number" id="systolic" min="70" max="250" placeholder="e.g., 120">
                     </div>
                     
                     <div class="form-group">
-                        <label>Diastolic BP (mmHg) <span class="info-tooltip" title="Bottom number in blood pressure reading">?</span></label>
+                        <label>Diastolic BP (mmHg) <span class="info-tooltip" data-tooltip-key="diastolic">?</span></label>
                         <input type="number" id="diastolic" min="40" max="150" placeholder="e.g., 80">
                     </div>
                     
@@ -499,12 +514,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>HDL Cholesterol (mg/dL) <span class="info-tooltip" title="Good cholesterol">?</span></label>
+                        <label>HDL Cholesterol (mg/dL) <span class="info-tooltip" data-tooltip-key="hdl">?</span></label>
                         <input type="number" id="hdl" min="20" max="100" placeholder="e.g., 50">
                     </div>
                     
                     <div class="form-group">
-                        <label>LDL Cholesterol (mg/dL) <span class="info-tooltip" title="Bad cholesterol">?</span></label>
+                        <label>LDL Cholesterol (mg/dL) <span class="info-tooltip" data-tooltip-key="ldl">?</span></label>
                         <input type="number" id="ldl" min="50" max="300" placeholder="e.g., 100">
                     </div>
                     
@@ -519,7 +534,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Blood Glucose (mg/dL) <span class="info-tooltip" title="Fasting blood sugar">?</span></label>
+                        <label>Blood Glucose (mg/dL) <span class="info-tooltip" data-tooltip-key="glucose">?</span></label>
                         <input type="number" id="glucose" min="50" max="400" placeholder="e.g., 100">
                     </div>
                     
@@ -529,7 +544,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Physical Activity Level</label>
+                        <label for="activity">Physical Activity Level</label>
                         <select id="activity">
                             <option value="">Select</option>
                             <option value="sedentary">Sedentary (little or no exercise)</option>
@@ -541,7 +556,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Smoking Status</label>
+                        <label for="smoking">Smoking Status</label>
                         <select id="smoking">
                             <option value="">Select</option>
                             <option value="never">Never smoked</option>
@@ -551,7 +566,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Are you a student-athlete?</label>
+                        <label for="isAthlete">Are you a student-athlete?</label>
                         <select id="isAthlete">
                             <option value="no">No</option>
                             <option value="yes">Yes</option>
@@ -559,7 +574,7 @@
                     </div>
                 </div>
                 
-                <button class="calculate-btn" onclick="calculateAll()">📊 Calculate My Numbers</button>
+                <button class="calculate-btn" onclick="calculateAll()">Calculate My Numbers</button>
                 
                 <div id="results" class="results"></div>
             </div>
@@ -567,7 +582,7 @@
             <!-- Athlete Tab -->
             <div id="athlete" class="tab-content">
                 <div class="athlete-section">
-                    <h2>🏃 Student-Athlete Specialized Assessment</h2>
+                    <h2>Student-Athlete Specialized Assessment</h2>
                     <p>Athletes have unique physiological adaptations that require specialized interpretation of health metrics. This section uses sports medicine guidelines from the American College of Sports Medicine (ACSM) and National Athletic Trainers' Association (NATA).</p>
                 </div>
                 
@@ -589,7 +604,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>VO2 Max (ml/kg/min) <span class="info-tooltip" title="If known from testing">?</span></label>
+                        <label>VO2 Max (ml/kg/min) <span class="info-tooltip" data-tooltip-key="vo2max">?</span></label>
                         <input type="number" id="vo2max" min="20" max="90" step="0.1" placeholder="e.g., 55">
                     </div>
                     
@@ -599,24 +614,24 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Max Heart Rate (bpm) <span class="info-tooltip" title="From stress test if available">?</span></label>
+                        <label>Max Heart Rate (bpm) <span class="info-tooltip" data-tooltip-key="maxhr">?</span></label>
                         <input type="number" id="maxHR" min="140" max="220" placeholder="e.g., 195">
                     </div>
                     
                     <div class="form-group">
-                        <label>Recovery Heart Rate <span class="info-tooltip" title="HR decrease after 1 min rest post-exercise">?</span></label>
+                        <label>Recovery Heart Rate <span class="info-tooltip" data-tooltip-key="recoveryhr">?</span></label>
                         <input type="number" id="recoveryHR" min="10" max="80" placeholder="e.g., 25">
                     </div>
                 </div>
                 
-                <button class="calculate-btn" onclick="calculateAthleteMetrics()">🎯 Analyze Athletic Profile</button>
+                <button class="calculate-btn" onclick="calculateAthleteMetrics()">Analyze Athletic Profile</button>
                 
                 <div id="athleteResults"></div>
             </div>
             
             <!-- Education Tab -->
             <div id="education" class="tab-content">
-                <h2>📚 Understanding Your Health Numbers</h2>
+                <h2>Understanding Your Health Numbers</h2>
                 
                 <div class="metric-card">
                     <h3>Blood Pressure (CDC Guidelines 2024)</h3>
@@ -747,16 +762,16 @@
             
             <!-- Resources Tab -->
             <div id="resources" class="tab-content">
-                <h2>🏥 Springfield College Health Resources</h2>
+                <h2>Springfield College Health Resources</h2>
                 
                 <div class="metric-card">
                     <h3>Campus Health Services</h3>
                     <p><strong>Springfield College Health Services</strong></p>
-                    <p>📍 Location: Health Services, Fuller Arts Center (First Floor)</p>
-                    <p>📞 Phone: (413) 748-3325</p>
-                    <p>📧 Email: healthservices@springfield.edu</p>
-                    <p>🕐 Hours: Monday-Friday 8:30 AM - 4:30 PM (Academic Year)</p>
-                    <p>🌐 Website: <a href="https://springfield.edu/student-life/health-services" target="_blank">springfield.edu/student-life/health-services</a></p>
+                    <p>Location: Health Services, Fuller Arts Center (First Floor)</p>
+                    <p>Phone: (413) 748-3325</p>
+                    <p>Email: healthservices@springfield.edu</p>
+                    <p>Hours: Monday-Friday 8:30 AM - 4:30 PM (Academic Year)</p>
+                    <p>Website: <a href="https://springfield.edu/student-life/health-services" target="_blank" rel="noopener">springfield.edu/student-life/health-services</a></p>
                     <p><strong>Services:</strong> Primary care, health screenings, blood pressure monitoring, immunizations, referrals, health education</p>
                     <p><strong>After Hours:</strong> Call campus safety at (413) 748-3333 for emergencies</p>
                 </div>
@@ -764,52 +779,52 @@
                 <div class="metric-card">
                     <h3>Athletic Training Services</h3>
                     <p><strong>Springfield College Athletic Training Department</strong></p>
-                    <p>📍 Location: Athletic Training Room, Blake Arena</p>
-                    <p>📞 Phone: (413) 748-3353</p>
-                    <p>📧 Email: athletics@springfield.edu</p>
-                    <p>⚕️ Services: Injury evaluation and treatment, rehabilitation, sports physicals, cardiovascular screening for athletes, performance optimization, return-to-play protocols</p>
+                    <p>Location: Athletic Training Room, Blake Arena</p>
+                    <p>Phone: (413) 748-3353</p>
+                    <p>Email: athletics@springfield.edu</p>
+                    <p>Services: Injury evaluation and treatment, rehabilitation, sports physicals, cardiovascular screening for athletes, performance optimization, return-to-play protocols</p>
                     <p><strong>Hours:</strong> Vary by sport season - contact for current schedule</p>
                 </div>
                 
                 <div class="resources">
                     <div class="resource-card" onclick="window.open('https://www.cdc.gov/bloodpressure/index.htm', '_blank')">
-                        <h4>🏛️ CDC - High Blood Pressure</h4>
+                        <h4>CDC - High Blood Pressure</h4>
                         <p>Centers for Disease Control and Prevention</p>
                         <p>Comprehensive data, prevention strategies, and monitoring guidelines</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://www.heart.org/', '_blank')">
-                        <h4>❤️ American Heart Association</h4>
+                        <h4>American Heart Association</h4>
                         <p>Heart health education, cholesterol management, lifestyle interventions</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://www.nhlbi.nih.gov/', '_blank')">
-                        <h4>🔬 National Heart, Lung, and Blood Institute</h4>
+                        <h4>National Heart, Lung, and Blood Institute</h4>
                         <p>Research-based health information and clinical guidelines</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://www.cdc.gov/cholesterol/index.htm', '_blank')">
-                        <h4>📊 CDC - Cholesterol</h4>
+                        <h4>CDC - Cholesterol</h4>
                         <p>Cholesterol facts, screening recommendations, management strategies</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://www.niddk.nih.gov/', '_blank')">
-                        <h4>🩺 National Institute of Diabetes</h4>
+                        <h4>National Institute of Diabetes</h4>
                         <p>Diabetes prevention, blood glucose monitoring, nutrition guidance</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://www.acsm.org/', '_blank')">
-                        <h4>🏃 American College of Sports Medicine</h4>
+                        <h4>American College of Sports Medicine</h4>
                         <p>Exercise guidelines, athletic performance, sports medicine research</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://www.nata.org/', '_blank')">
-                        <h4>⚕️ National Athletic Trainers Association</h4>
+                        <h4>National Athletic Trainers Association</h4>
                         <p>Athletic health, injury prevention, student-athlete wellness</p>
                     </div>
                     
                     <div class="resource-card" onclick="window.open('https://health.gov/our-work/nutrition-physical-activity', '_blank')">
-                        <h4>🥗 ODPHP - Nutrition & Physical Activity</h4>
+                        <h4>ODPHP - Nutrition & Physical Activity</h4>
                         <p>Office of Disease Prevention and Health Promotion</p>
                         <p>Dietary Guidelines for Americans, exercise recommendations</p>
                     </div>
@@ -818,48 +833,50 @@
                 <div class="metric-card">
                     <h3>Emergency & Urgent Care</h3>
                     <p><strong>Baystate Medical Center</strong></p>
-                    <p>📍 759 Chestnut Street, Springfield, MA 01199</p>
-                    <p>📞 Emergency: 911 | Main: (413) 794-0000</p>
-                    <p>🏥 Level I Trauma Center - 24/7 Emergency Services</p>
+                    <p>Address: 759 Chestnut Street, Springfield, MA 01199</p>
+                    <p>Emergency: 911 | Main: (413) 794-0000</p>
+                    <p>Level I Trauma Center - 24/7 Emergency Services</p>
                     
                     <p style="margin-top: 20px;"><strong>Mercy Medical Center</strong></p>
-                    <p>📍 271 Carew Street, Springfield, MA 01104</p>
-                    <p>📞 (413) 748-9000</p>
+                    <p>Address: 271 Carew Street, Springfield, MA 01104</p>
+                    <p>Phone: (413) 748-9000</p>
                 </div>
                 
                 <div class="metric-card">
                     <h3>Local Health Departments</h3>
                     <p><strong>Springfield Department of Health & Human Services</strong></p>
-                    <p>📍 95 State Street, Springfield, MA 01103</p>
-                    <p>📞 (413) 787-6400</p>
-                    <p>🌐 <a href="https://www.springfield-ma.gov/health/" target="_blank">springfield-ma.gov/health</a></p>
+                    <p>Address: 95 State Street, Springfield, MA 01103</p>
+                    <p>Phone: (413) 787-6400</p>
+                    <p>Website: <a href="https://www.springfield-ma.gov/health/" target="_blank" rel="noopener">springfield-ma.gov/health</a></p>
                     <p><strong>Services:</strong> Free health screenings, immunizations, health education programs</p>
                 </div>
                 
                 <div class="metric-card">
                     <h3>Mental Health & Counseling</h3>
                     <p><strong>Springfield College Counseling Center</strong></p>
-                    <p>📍 Location: Health Services, Fuller Arts Center (First Floor)</p>
-                    <p>📞 Phone: (413) 748-3468</p>
-                    <p>📧 Email: counseling@springfield.edu</p>
-                    <p>🕐 Hours: Monday-Friday 8:30 AM - 4:30 PM</p>
-                    <p>💚 Free, confidential counseling services for stress, anxiety, depression, and wellness support</p>
+                    <p>Location: Health Services, Fuller Arts Center (First Floor)</p>
+                    <p>Phone: (413) 748-3468</p>
+                    <p>Email: counseling@springfield.edu</p>
+                    <p>Hours: Monday-Friday 8:30 AM - 4:30 PM</p>
+                    <p>Free, confidential counseling services for stress, anxiety, depression, and wellness support</p>
                     <p><strong>Services:</strong> Individual counseling, group therapy, crisis intervention, psychiatric consultations, wellness workshops</p>
                     
                     <p style="margin-top: 15px;"><strong>24/7 Crisis Support:</strong></p>
-                    <p>📞 988 Suicide & Crisis Lifeline: Call or text 988</p>
-                    <p>📞 Crisis Text Line: Text "HELLO" to 741741</p>
-                    <p>📞 Campus Safety (24/7): (413) 748-3333</p>
+                    <p>Phone: 988 Suicide & Crisis Lifeline: Call or text 988</p>
+                    <p>Phone: Crisis Text Line: Text "HELLO" to 741741</p>
+                    <p>Phone: Campus Safety (24/7): (413) 748-3333</p>
                 </div>
             </div>
             
             <!-- Statistics Tab -->
             <div id="statistics" class="tab-content">
-                <h2>📈 National Health Statistics & Trends</h2>
+                <h2>National Health Statistics & Trends</h2>
                 
                 <div class="metric-card">
                     <h3>Cardiovascular Disease Burden (CDC 2024)</h3>
-                    <canvas id="cvdChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="cvdChart"></canvas>
+                    </div>
                     <ul style="margin-top: 20px;">
                         <li><strong>697,000</strong> deaths from heart disease annually (1 in 5 deaths)</li>
                         <li><strong>$239 billion</strong> annual cost of cardiovascular disease</li>
@@ -871,7 +888,9 @@
                 
                 <div class="metric-card">
                     <h3>Cholesterol Statistics (American Heart Association 2024)</h3>
-                    <canvas id="cholesterolChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="cholesterolChart"></canvas>
+                    </div>
                     <ul style="margin-top: 20px;">
                         <li><strong>94 million</strong> US adults age 20+ have high cholesterol (≥200 mg/dL)</li>
                         <li><strong>28 million</strong> adults could benefit from cholesterol medication</li>
@@ -882,7 +901,9 @@
                 
                 <div class="metric-card">
                     <h3>Obesity Epidemic (NIH & CDC Data)</h3>
-                    <canvas id="obesityChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="obesityChart"></canvas>
+                    </div>
                     <ul style="margin-top: 20px;">
                         <li><strong>42.4%</strong> of US adults are obese (BMI ≥ 30)</li>
                         <li><strong>73.6%</strong> of adults are overweight or obese (BMI ≥ 25)</li>
@@ -935,7 +956,9 @@
                 
                 <div class="metric-card">
                     <h3>Economic & Social Impact</h3>
-                    <canvas id="costChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
                     <ul style="margin-top: 20px;">
                         <li><strong>$407 billion:</strong> Annual productivity loss from cardiovascular disease</li>
                         <li><strong>147 million:</strong> Workdays lost due to heart disease and stroke</li>
@@ -950,58 +973,58 @@
         <div id="downloadSection" class="download-section" style="display: none;">
             <h3>📄 Download Your Health Report</h3>
             <p>Save your personalized health assessment for your records and to share with your healthcare provider</p>
-            <button class="download-btn" onclick="downloadPDF()">⬇️ Download PDF Report</button>
-            <button class="download-btn" style="background: #007bff;" onclick="downloadData()">📊 Download Data (JSON)</button>
+            <button class="download-btn" onclick="downloadPDF()">Download PDF Report</button>
+            <button class="download-btn" style="background: #007bff;" onclick="downloadData()">Download Data (JSON)</button>
         </div>
         
         <div class="footer">
             <div class="footer-grid">
                 <div class="footer-section">
                     <h4>Springfield College</h4>
-                    <a href="https://springfield.edu" target="_blank">Springfield.edu</a>
-                    <a href="https://springfield.edu/student-life/health-services" target="_blank">Health Services</a>
-                    <a href="https://springfield.edu/academics/undergraduate-programs/health-sciences-and-rehabilitation-studies" target="_blank">Health Sciences Programs</a>
-                    <p style="margin-top: 10px;">📍 263 Alden Street<br>Springfield, MA 01109</p>
-                    <p>📞 Main: (413) 748-3000</p>
-                    <p>📞 Health Services: (413) 748-3325</p>
-                    <p>📞 Counseling: (413) 748-3468</p>
-                    <p>📞 Campus Safety: (413) 748-3333</p>
+                    <a href="https://springfield.edu" target="_blank" rel="noopener">Springfield.edu</a>
+                    <a href="https://springfield.edu/student-life/health-services" target="_blank" rel="noopener">Health Services</a>
+                    <a href="https://springfield.edu/academics/undergraduate-programs/health-sciences-and-rehabilitation-studies" target="_blank" rel="noopener">Health Sciences Programs</a>
+                    <p style="margin-top: 10px;">263 Alden Street<br>Springfield, MA 01109</p>
+                    <p>Main: (413) 748-3000</p>
+                    <p>Health Services: (413) 748-3325</p>
+                    <p>Counseling: (413) 748-3468</p>
+                    <p>Campus Safety: (413) 748-3333</p>
                 </div>
                 
                 <div class="footer-section">
                     <h4>Federal Health Resources</h4>
-                    <a href="https://www.cdc.gov" target="_blank">CDC - Centers for Disease Control</a>
-                    <a href="https://www.nih.gov" target="_blank">NIH - National Institutes of Health</a>
-                    <a href="https://www.heart.org" target="_blank">American Heart Association</a>
-                    <a href="https://www.nhlbi.nih.gov" target="_blank">National Heart, Lung, Blood Institute</a>
-                    <a href="https://health.gov" target="_blank">Health.gov</a>
+                    <a href="https://www.cdc.gov" target="_blank" rel="noopener">CDC - Centers for Disease Control</a>
+                    <a href="https://www.nih.gov" target="_blank" rel="noopener">NIH - National Institutes of Health</a>
+                    <a href="https://www.heart.org" target="_blank" rel="noopener">American Heart Association</a>
+                    <a href="https://www.nhlbi.nih.gov" target="_blank" rel="noopener">National Heart, Lung, Blood Institute</a>
+                    <a href="https://health.gov" target="_blank" rel="noopener">Health.gov</a>
                 </div>
                 
                 <div class="footer-section">
                     <h4>Important Contacts</h4>
-                    <a href="tel:911">🚨 Emergency: 911</a>
-                    <a href="tel:988">💚 Crisis Line: 988</a>
-                    <a href="tel:4137483325">🏥 Health Services: (413) 748-3325</a>
-                    <a href="tel:4137483468">🧠 Counseling: (413) 748-3468</a>
-                    <a href="tel:4137483333">👮 Campus Safety: (413) 748-3333</a>
-                    <a href="tel:8002221222">☠️ Poison Control: (800) 222-1222</a>
+                    <a href="tel:911">Emergency: 911</a>
+                    <a href="tel:988">Crisis Line: 988</a>
+                    <a href="tel:4137483325">Health Services: (413) 748-3325</a>
+                    <a href="tel:4137483468">Counseling: (413) 748-3468</a>
+                    <a href="tel:4137483333">Campus Safety: (413) 748-3333</a>
+                    <a href="tel:8002221222">Poison Control: (800) 222-1222</a>
                 </div>
                 
                 <div class="footer-section">
                     <h4>Data Sources</h4>
                     <p>This tool uses official data from:</p>
-                    <ul style="list-style: none; padding: 0; text-align: left;">
-                        <li>✓ CDC NHANES 2017-2020</li>
-                        <li>✓ American Heart Association 2024</li>
-                        <li>✓ NIH Clinical Guidelines</li>
-                        <li>✓ ACSM Exercise Standards</li>
-                        <li>✓ NATA Athletic Guidelines</li>
+                    <ul style="list-style: disc; padding-left: 20px; text-align: left;">
+                        <li>CDC NHANES 2017-2020</li>
+                        <li>American Heart Association 2024</li>
+                        <li>NIH Clinical Guidelines</li>
+                        <li>ACSM Exercise Standards</li>
+                        <li>NATA Athletic Guidelines</li>
                     </ul>
                 </div>
             </div>
             
             <div style="border-top: 1px solid #34495e; padding-top: 20px; margin-top: 30px;">
-                <p><strong>© 2025 Springfield College Know Your Numbers Campaign. All rights reserved.</strong></p>
+                <p><strong>© 2025 Tofael. All rights reserved. Springfield College Know Your Numbers Campaign.</strong></p>
                 <p style="margin-top: 10px; font-size: 0.9em;">HLTH 210: Family and Consumer Health - Health Promotion/Communication Campaign</p>
                 <p style="margin-top: 10px; font-size: 0.85em; color: #95a5a6;">
                     <strong>DISCLAIMER:</strong> This tool is for educational purposes only and does not replace professional medical advice, diagnosis, or treatment. 
@@ -1015,16 +1038,101 @@
         let userHealthData = {};
         let charts = {};
         
-        function showTab(tabName) {
+        function showTab(tabName, triggerEl) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            if (triggerEl) {
+                triggerEl.classList.add('active');
+            }
             
             if (tabName === 'statistics') {
                 setTimeout(initializeCharts, 100);
             }
         }
+        
+        // Tooltip data and interactions
+        const tooltipDefinitions = {
+            age: {
+                title: 'Age',
+                body: 'Your age helps tailor risk assessments. Example: Age 45 may increase cardiovascular risk compared to age 20.'
+            },
+            height: {
+                title: 'Height (inches)',
+                body: 'Enter your height in inches. Example: 5 feet 8 inches = 68 inches.'
+            },
+            systolic: {
+                title: 'Systolic Blood Pressure',
+                body: 'The top number in a blood pressure reading, measuring arterial pressure during heartbeats. Example: 120/80 → systolic is 120.'
+            },
+            diastolic: {
+                title: 'Diastolic Blood Pressure',
+                body: 'The bottom number in a blood pressure reading, measuring pressure between beats. Example: 120/80 → diastolic is 80.'
+            },
+            hdl: {
+                title: 'HDL Cholesterol',
+                body: 'High-density lipoprotein; often called “good” cholesterol. Higher values are protective. Example: HDL 60 mg/dL is optimal.'
+            },
+            ldl: {
+                title: 'LDL Cholesterol',
+                body: 'Low-density lipoprotein; known as “bad” cholesterol. Lower values are better. Example: LDL 95 mg/dL is optimal.'
+            },
+            glucose: {
+                title: 'Fasting Blood Glucose',
+                body: 'Blood sugar after an overnight fast. Example: 92 mg/dL is normal; 110 mg/dL suggests prediabetes.'
+            },
+            vo2max: {
+                title: 'VO2 Max',
+                body: 'Maximal oxygen uptake during intense exercise, reflecting aerobic fitness. Example: 50 ml/kg/min indicates good endurance capacity.'
+            },
+            maxhr: {
+                title: 'Maximum Heart Rate',
+                body: 'Highest heart rate during maximal exertion (often from a stress test). Example: 195 bpm for a young adult athlete.'
+            },
+            recoveryhr: {
+                title: 'Recovery Heart Rate',
+                body: 'Decrease in heart rate 1 minute after stopping exercise; larger drops indicate better fitness. Example: Drop of 25 bpm is strong recovery.'
+            }
+        };
+        
+        let activeTooltipEl = null;
+        function showTooltipBubble(targetEl, key) {
+            hideTooltipBubble();
+            const def = tooltipDefinitions[key];
+            if (!def) return;
+            const rect = targetEl.getBoundingClientRect();
+            const bubble = document.createElement('div');
+            bubble.className = 'tooltip-bubble';
+            bubble.innerHTML = `<h4>${def.title}</h4><p>${def.body}</p>`;
+            document.body.appendChild(bubble);
+            const top = rect.bottom + window.scrollY + 8;
+            const left = Math.min(
+                Math.max(rect.left + window.scrollX - 10, 12),
+                window.scrollX + document.documentElement.clientWidth - bubble.offsetWidth - 12
+            );
+            bubble.style.top = `${top}px`;
+            bubble.style.left = `${left}px`;
+            activeTooltipEl = bubble;
+        }
+        function hideTooltipBubble() {
+            if (activeTooltipEl && activeTooltipEl.parentNode) {
+                activeTooltipEl.parentNode.removeChild(activeTooltipEl);
+            }
+            activeTooltipEl = null;
+        }
+        document.addEventListener('click', (e) => {
+            const trigger = e.target.closest('.info-tooltip');
+            if (trigger) {
+                const key = trigger.getAttribute('data-tooltip-key');
+                if (activeTooltipEl) {
+                    hideTooltipBubble();
+                }
+                showTooltipBubble(trigger, key);
+                e.stopPropagation();
+            } else {
+                hideTooltipBubble();
+            }
+        });
         
         function calculateAll() {
             const age = parseFloat(document.getElementById('age').value);
@@ -1532,7 +1640,7 @@
         
         function displayResults(results) {
             const resultsDiv = document.getElementById('results');
-            let html = '<h2>📊 Your Health Assessment Results</h2>';
+            let html = '<h2>Your Health Assessment Results</h2>';
             
             // BMI Card
             if (results.bmi) {
@@ -1767,7 +1875,7 @@
                 return;
             }
             
-            let html = '<h2>🏃 Student-Athlete Health Analysis</h2>';
+            let html = '<h2>Student-Athlete Health Analysis</h2>';
             
             // VO2 Max Assessment
             if (vo2max) {
@@ -2014,7 +2122,7 @@
             if (sex === 'female' && bodyFat && bodyFat < 18) {
                 html += `
                     <div class="risk-assessment">
-                        <h3>⚠️ Female Athlete Triad Screening Alert</h3>
+                        <h3>Female Athlete Triad Screening Alert</h3>
                         <p><strong>Your body fat percentage suggests potential risk for the Female Athlete Triad:</strong></p>
                         <ol>
                             <li><strong>Low Energy Availability:</strong> Insufficient caloric intake for training demands</li>
@@ -2517,7 +2625,7 @@
             // Footer
             pdf.setFontSize(8);
             pdf.setTextColor(100);
-            pdf.text('© 2025 Springfield College Know Your Numbers Campaign', 105, 280, { align: 'center' });
+            pdf.text('© 2025 Tofael. All rights reserved. Springfield College Know Your Numbers Campaign', 105, 280, { align: 'center' });
             pdf.text('Data sources: CDC, American Heart Association, National Institutes of Health', 105, 285, { align: 'center' });
             
             // Save PDF
