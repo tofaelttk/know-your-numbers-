@@ -1037,6 +1037,10 @@
     <script>
         let userHealthData = {};
         let charts = {};
+        // Increase chart rendering resolution for clearer exports
+        if (window.Chart) {
+            Chart.defaults.devicePixelRatio = Math.max(2, window.devicePixelRatio || 1);
+        }
         
         function showTab(tabName, triggerEl) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1186,7 +1190,17 @@
             
             let category, status, risk, recommendations;
             
-            if (sys < 120 && dia < 80) {
+            // ACC/AHA enriched classification
+            if (sys >= 180 || dia >= 120) {
+                category = 'Hypertensive Crisis';
+                status = 'status-high';
+                risk = 'Emergency';
+                recommendations = [
+                    'IMMEDIATE EMERGENCY CARE REQUIRED',
+                    'Call emergency services or go to ER now',
+                    'Do not delay; risk of stroke or heart attack is high'
+                ];
+            } else if (sys < 120 && dia < 80) {
                 category = 'Normal';
                 status = 'status-normal';
                 risk = 'Low';
@@ -2392,9 +2406,11 @@
             }
         }
         
-        function downloadPDF() {
+        async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = 210;
+            const pageHeight = 297;
             
             // Title
             pdf.setFontSize(20);
@@ -2628,6 +2644,29 @@
             pdf.text('© 2025 Tofael. All rights reserved. Springfield College Know Your Numbers Campaign', 105, 280, { align: 'center' });
             pdf.text('Data sources: CDC, American Heart Association, National Institutes of Health', 105, 285, { align: 'center' });
             
+            // Capture colorful visual sections (if present) and add as images
+            async function addSectionImage(sectionId, title) {
+                const el = document.getElementById(sectionId);
+                if (!el || el.offsetHeight === 0) return;
+                const canvas = await html2canvas(el, { scale: 3, backgroundColor: '#ffffff', useCORS: true });
+                const imgData = canvas.toDataURL('image/png');
+                const margin = 12;
+                const imgWidth = pageWidth - margin * 2;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addPage();
+                pdf.setFontSize(12);
+                pdf.setFont(undefined, 'bold');
+                pdf.text(title, margin, 18);
+                pdf.addImage(imgData, 'PNG', margin, 24, imgWidth, Math.min(imgHeight, pageHeight - 24 - margin));
+            }
+
+            await addSectionImage('results', 'Personalized Results');
+            await addSectionImage('athleteResults', 'Student-Athlete Analysis');
+            const statsEl = document.getElementById('statistics');
+            if (statsEl && statsEl.classList.contains('active')) {
+                await addSectionImage('statistics', 'National Health Statistics & Trends');
+            }
+
             // Save PDF
             pdf.save(`Know_Your_Numbers_Report_${new Date().toISOString().split('T')[0]}.pdf`);
         }
