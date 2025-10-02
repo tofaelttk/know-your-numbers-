@@ -181,6 +181,20 @@
             color: #1e3c72;
         }
         .tooltip-bubble p { margin: 0; line-height: 1.35; }
+
+        /* Capture mode: ensure full opacity and disable visual effects during PDF snapshot */
+        .capture-mode * { 
+            animation: none !important; 
+            transition: none !important; 
+            box-shadow: none !important; 
+        }
+        .capture-mode .header p { opacity: 1 !important; }
+        .capture-mode .container { background: #ffffff !important; }
+        .capture-mode .athlete-metric { 
+            -webkit-backdrop-filter: none !important; 
+            backdrop-filter: none !important; 
+            background: rgba(255,255,255,0.95) !important; 
+        }
         
         .calculate-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -2648,7 +2662,10 @@
             async function addSectionImage(sectionId, title) {
                 const el = document.getElementById(sectionId);
                 if (!el || el.offsetHeight === 0) return;
+                // Toggle capture mode to avoid washed-out effects
+                document.body.classList.add('capture-mode');
                 const canvas = await html2canvas(el, { scale: 3, backgroundColor: '#ffffff', useCORS: true });
+                document.body.classList.remove('capture-mode');
                 const imgData = canvas.toDataURL('image/png');
                 const margin = 12;
                 const imgWidth = pageWidth - margin * 2;
